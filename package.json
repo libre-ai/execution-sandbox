@@ -1,0 +1,39 @@
+{
+  "name": "@libre-ai/harness-gates",
+  "private": true,
+  "license": "EUPL-1.2",
+  "type": "module",
+  "packageManager": "bun@1.4.0-canary.1",
+  "engines": {
+    "bun": ">=1.4.0"
+  },
+  "overrides": {
+    "fast-uri": "4.1.2",
+    "@libre-ai/governance": "file:../project-governance"
+  },
+  "devDependencies": {
+    "@libre-ai/governance": "file:../project-governance",
+    "@libre-ai/contracts-authority": "file:../schemas-and-contracts",
+    "@biomejs/biome": "2.5.3",
+    "@types/bun": "1.3.14",
+    "typescript": "7.0.2"
+  },
+  "scripts": {
+    "check:bun:runtime": "bun node_modules/@libre-ai/governance/tools/quality/check-bun-minimum.ts",
+    "check:bun": "bun run check:bun:runtime && bun node_modules/@libre-ai/governance/tools/quality/check-bun-manifests.ts",
+    "check:toolchain": "bun run check:bun && bun node_modules/@libre-ai/governance/tools/quality/check-toolchain.ts",
+    "check:secret-scan": "bun run check:bun:runtime && bun node_modules/@libre-ai/governance/tools/quality/check-secret-scan.ts",
+    "check:personal-data": "bun run check:bun:runtime && bun node_modules/@libre-ai/governance/tools/quality/check-personal-data-boundary.ts",
+    "check:capabilities": "bun run check:bun:runtime && bun test verification/agent-harness/capability-boundary.test.ts",
+    "check:specifications": "bun run check:bun:runtime && bun node_modules/@libre-ai/governance/tools/quality/check-specification-lock.ts --apps harness",
+    "lint": "bun run check:bun:runtime && biome ci .",
+    "typecheck": "bun run check:bun:runtime && tsc --noEmit -p tsconfig.json",
+    "test": "cargo test --locked",
+    "pretest": "bun run check:bun",
+    "check": "bun run check:bun && bun run check:toolchain && bun run check:capabilities && bun run check:linux-e2e-gate && bun run check:coverage-gate && bun run check:contract-fixtures && bun run check:secret-scan && bun run check:personal-data && bun run check:specifications && bun run lint && bun run typecheck && bun run check:rust",
+    "check:contract-fixtures": "bun run check:bun:runtime && bun test verification/agent-harness/contract-fixtures.test.ts verification/agent-harness/sdk-input-pin.test.ts && bun verification/agent-harness/check-contract-fixtures.ts",
+    "check:linux-e2e-gate": "bun run check:bun:runtime && bun test verification/agent-harness/linux-e2e-gate.test.ts",
+    "check:coverage-gate": "bun run check:bun:runtime && bun test verification/agent-harness/coverage-gate.test.ts",
+    "check:rust": "bun run check:bun:runtime && cargo fmt --all --check && cargo clippy --locked --all-targets --all-features -- -D warnings && cargo test --locked --all-features"
+  }
+}

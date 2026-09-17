@@ -1,0 +1,324 @@
+{
+  "sources": [
+    {
+      "source": "snapshots/harness/857f9db069a510cc",
+      "revision": null,
+      "archiveSha256": "857f9db069a510cccd7c66d70761f6f817b881fb8697d4c384f10908389e719d",
+      "files": [
+        {
+          "sourcePath": "Cargo.toml",
+          "destination": "Cargo.toml",
+          "sha256": "86d569de0aef546cf911cb21e23f360e54503c15354d2414bc925cb06550586c"
+        },
+        {
+          "sourcePath": "REUSE.toml",
+          "destination": "docs/recovered-source/REUSE.toml",
+          "sha256": "1da34a2e82158fa6eb9e516ccb361822537a676a6179882f46c33d2f40caea2a"
+        },
+        {
+          "sourcePath": "deny.toml",
+          "destination": "deny.toml",
+          "sha256": "8fbd07c98a3d69cfdd87e7cd27ed249bb73fecb77fd35ae7846fa84f65fd7eaf"
+        },
+        {
+          "sourcePath": "bunfig.toml",
+          "destination": "bunfig.toml",
+          "sha256": "5da4d7eb4d1e5c1c37d487034e56773e8e1f568daec675b114c5257942f48342"
+        },
+        {
+          "sourcePath": "Cargo.lock",
+          "destination": "Cargo.lock",
+          "sha256": "c720a288dc84f77957624a264fe104aae81c79c1f525a0a82a15ca1a3ff24026"
+        },
+        {
+          "sourcePath": "bun.lock",
+          "destination": "bun.lock",
+          "sha256": "56594f9d62314c99bad798fc67e58d78d85d391d5f683f4a4d3c8343af47e387"
+        },
+        {
+          "sourcePath": "project.v1.yaml",
+          "destination": "project.v1.yaml",
+          "sha256": "7fa0da8617e627f229d60d7ad884354b5000861328568a2d6012ebae6446b421"
+        },
+        {
+          "sourcePath": "README.md",
+          "destination": "docs/recovered-source/README.md",
+          "sha256": "d4d54d611bcbd51162fa0fc4783d054dd37b675972b3f45b7166aff4eff5e033"
+        },
+        {
+          "sourcePath": ".gitignore",
+          "destination": ".gitignore",
+          "sha256": "19b23de57a80020117177f6f3a34b5b5ce98c2623a8e8e6e211453bbf6458bfa"
+        },
+        {
+          "sourcePath": "package.json",
+          "destination": "package.json",
+          "sha256": "353fb252e8e2506c68f1f946c40abdd113cf9b883f9c2246f920be79574c686a"
+        },
+        {
+          "sourcePath": "tsconfig.json",
+          "destination": "tsconfig.json",
+          "sha256": "7baf1fb9a272e3401acbdb133e442632ce5d9c82008247e8ce0363e8b48693b7"
+        },
+        {
+          "sourcePath": "rust-toolchain.toml",
+          "destination": "rust-toolchain.toml",
+          "sha256": "eb8ed53423a7d9d3e3b3fc0367ee89426b4b9385114465919926b2829bfe7ecd"
+        },
+        {
+          "sourcePath": "biome.json",
+          "destination": "biome.json",
+          "sha256": "b4e71293b49d0d79937248f367074e1b1c5c079bb59a86d1cacb03419d625cfe"
+        },
+        {
+          "sourcePath": "LICENSES/CC-BY-4.0.txt",
+          "destination": "docs/recovered-source/LICENSES/CC-BY-4.0.txt",
+          "sha256": "d557539df68e771cc1eedcc91d13f70fca930e508d11eedcafa4b15db49e3744"
+        },
+        {
+          "sourcePath": "LICENSES/EUPL-1.2.txt",
+          "destination": "LICENSES/EUPL-1.2.txt",
+          "sha256": "57fb42fbcd0b037ce528ed8f72f1ec095d67bc6825ecf1448ff39be1fe68a4b4"
+        },
+        {
+          "sourcePath": "LICENSES/Apache-2.0.txt",
+          "destination": "LICENSES/Apache-2.0.txt",
+          "sha256": "074e6e32c86a4c0ef8b3ed25b721ca23aca83df277cd88106ef7177c354615ff"
+        },
+        {
+          "sourcePath": "tests/host_fs.rs",
+          "destination": "tests/host_fs.rs",
+          "sha256": "e72b034034fd9b03ea87ff67631a989a26151522fdc33c4f8dea4a0bbf4b6b26"
+        },
+        {
+          "sourcePath": "tests/outputs_core.rs",
+          "destination": "tests/outputs_core.rs",
+          "sha256": "038561131c9a1d1a59f3d830d3a127802768ebf9a25986cdfc41fd65e586c7e0"
+        },
+        {
+          "sourcePath": "tests/locked_harness_vectors.rs",
+          "destination": "tests/locked_harness_vectors.rs",
+          "sha256": "84be42bec25e4f8c1693d8c9327460488c6d0d2a69d50f1992802a68ee55b590"
+        },
+        {
+          "sourcePath": "tests/profile_core.rs",
+          "destination": "tests/profile_core.rs",
+          "sha256": "890de6b09e6fcd2382a4bfa2425f23a65069f84c8c70225ee4d9f3444b61bc20"
+        },
+        {
+          "sourcePath": "tests/engine_pin.rs",
+          "destination": "tests/engine_pin.rs",
+          "sha256": "fac19aeee87abff782dabb3a2769cebeb6a97021035b6551541e627d2c9b5e7c"
+        },
+        {
+          "sourcePath": "tests/confinement_plan_core.rs",
+          "destination": "tests/confinement_plan_core.rs",
+          "sha256": "dbf8c249afc0710556e20990288d19f3f2a7e3a71d136060bec64ade2b2b1989"
+        },
+        {
+          "sourcePath": "tests/controls_core.rs",
+          "destination": "tests/controls_core.rs",
+          "sha256": "4b4522a1e1bb408605d96017ee3410b79f16933945ceb4f5c50af08c1e9ee23b"
+        },
+        {
+          "sourcePath": "tests/effective_profile_core.rs",
+          "destination": "tests/effective_profile_core.rs",
+          "sha256": "30f51daa305c1d92ecd97c5f6894852385a5e28d7e442ad82abcdbc44f13258c"
+        },
+        {
+          "sourcePath": "tests/confined_execution.rs",
+          "destination": "tests/confined_execution.rs",
+          "sha256": "73a2cb98ccb7e96561b5709534ffec85b0841889a3620158ba5022b855cc5741"
+        },
+        {
+          "sourcePath": "tests/transport_binding.rs",
+          "destination": "tests/transport_binding.rs",
+          "sha256": "14b028a8bface8877e9ebfda3e8ad71559f53f251a2db7b8dda199e0550f46c2"
+        },
+        {
+          "sourcePath": "tests/host_process.rs",
+          "destination": "tests/host_process.rs",
+          "sha256": "3a2dd90866a5a8e7a68b6e6db821a37e87c350ef569f30c99291f9cea6cbb6fb"
+        },
+        {
+          "sourcePath": "tests/attestation_core.rs",
+          "destination": "tests/attestation_core.rs",
+          "sha256": "27734765735f36a9a6c8ae7ccf19062d66be618f4804487f7c5b7fe2a0f19272"
+        },
+        {
+          "sourcePath": "tests/fs_policy_core.rs",
+          "destination": "tests/fs_policy_core.rs",
+          "sha256": "9a571acd9bd4b3487e8350fef95975a0aad0bf100b6c0e92f027cdd983089785"
+        },
+        {
+          "sourcePath": "fixtures/README.md",
+          "destination": "fixtures/README.md",
+          "sha256": "2d26743b2b09f4567f88139d66d2231611829e3142b4ac344708c76894a6be45"
+        },
+        {
+          "sourcePath": "profiles/local-process.v2.json",
+          "destination": "profiles/local-process.v2.json",
+          "sha256": "aa6c494753d9d174b5f507eae67526efae2d49e2f396c7f677cdcf9d3b3a7c67"
+        },
+        {
+          "sourcePath": "profiles/engine-manifest.v1.json",
+          "destination": "profiles/engine-manifest.v1.json",
+          "sha256": "c42548e8da55215ca4a1dc334b3330fc3b18415810378e7305fac16b9074da52"
+        },
+        {
+          "sourcePath": "src/confinement.rs",
+          "destination": "src/confinement.rs",
+          "sha256": "1bd9863731fad27538e23adc6f2fd7c8b4120694551d2487e330ba155a6b8a43"
+        },
+        {
+          "sourcePath": "src/profile.rs",
+          "destination": "src/profile.rs",
+          "sha256": "bc7cef3fb7ef0e6264009360b1d0bc33669319c0b330fab13edbee75ff420c99"
+        },
+        {
+          "sourcePath": "src/lib.rs",
+          "destination": "src/lib.rs",
+          "sha256": "29c2118a9cb708a29b1eaf8307005b9b5e8fd5a7f3c1e9e604e58394955aa10d"
+        },
+        {
+          "sourcePath": "src/refusal.rs",
+          "destination": "src/refusal.rs",
+          "sha256": "00263ea967ad31704709af45c0273b873868973620d6bd8cb4bc8e5edc28a0aa"
+        },
+        {
+          "sourcePath": "src/fs_policy.rs",
+          "destination": "src/fs_policy.rs",
+          "sha256": "d764f4f37e05d6ed4c1f595de8260c85e22297569ff77b5a00f2bea733397c91"
+        },
+        {
+          "sourcePath": "src/controls.rs",
+          "destination": "src/controls.rs",
+          "sha256": "af92bd1b228e3841e9932a49740701aa2b0774992340448e8d3629282d584e86"
+        },
+        {
+          "sourcePath": "src/outputs.rs",
+          "destination": "src/outputs.rs",
+          "sha256": "0222375027d6b723455d8ad3ffbd8ff5efceab212713c1017ca4eb0eadf53cea"
+        },
+        {
+          "sourcePath": "src/canonical.rs",
+          "destination": "src/canonical.rs",
+          "sha256": "74d89da82221c197cbc9caa1d9ef5240491fe11fbf3b356c33b95f83eb2ab93b"
+        },
+        {
+          "sourcePath": "src/attestation.rs",
+          "destination": "src/attestation.rs",
+          "sha256": "fedb7f085dd69a2a3fc416c7715189aa62dc90b26e7e2d8685659ba9b1e8df8d"
+        },
+        {
+          "sourcePath": "src/host/run.rs",
+          "destination": "src/host/run.rs",
+          "sha256": "9e91c417991bbc010d7911c0e46a4e7986d39bcb9c7848e06b8d3834e82392f3"
+        },
+        {
+          "sourcePath": "src/host/mod.rs",
+          "destination": "src/host/mod.rs",
+          "sha256": "1d0ca5dda287cb9fa4ec2174cbae8c9360bb384d845b40a8a7e5cfa70afb9b88"
+        },
+        {
+          "sourcePath": "src/host/binding.rs",
+          "destination": "src/host/binding.rs",
+          "sha256": "25828b2f98fd411f93a2961494f7228c922c93731c80dd2bd3784783c87d3c3f"
+        },
+        {
+          "sourcePath": "src/host/fs.rs",
+          "destination": "src/host/fs.rs",
+          "sha256": "8acc52c5ecc7a0c98a010dd796ad246eb85829b79b121e36c91399ef02af5421"
+        },
+        {
+          "sourcePath": "src/host/process.rs",
+          "destination": "src/host/process.rs",
+          "sha256": "43317c49ab37db8bbe6305f9c93360557bb2d531ad3937f73655458347ef9c18"
+        },
+        {
+          "sourcePath": "fixtures/contracts/schemas/harness-profile.v2.schema.json",
+          "destination": "fixtures/contracts/schemas/harness-profile.v2.schema.json",
+          "sha256": "effbf2f1ff100588df44e37a64f165a0f0261e84b0781054a80c911cf1305634"
+        },
+        {
+          "sourcePath": "fixtures/contracts/fixtures/agent-orchestration-v1/digest-vectors.v1.json",
+          "destination": "fixtures/contracts/fixtures/agent-orchestration-v1/digest-vectors.v1.json",
+          "sha256": "f4ab94b10d6a5c5804f4bf8e61db9218a0c9fd765e0a8ed439d2aaf2a93c27c3"
+        },
+        {
+          "sourcePath": "fixtures/contracts/fixtures/agent-orchestration-v1/signature-vectors.v1.json",
+          "destination": "fixtures/contracts/fixtures/agent-orchestration-v1/signature-vectors.v1.json",
+          "sha256": "28862f8b808e554d2d18ba1cf250a98e871480b9ee210eb4f23b65f53012703b"
+        },
+        {
+          "sourcePath": "verification/agent-harness/export-coverage.ts",
+          "destination": "verification/agent-harness/export-coverage.ts",
+          "sha256": "3278a5428552cdd7a6414635b7c84519a36b0257080f14ef472edb79a623021f"
+        },
+        {
+          "sourcePath": "verification/agent-harness/check-linux-e2e.sh",
+          "destination": "verification/agent-harness/check-linux-e2e.sh",
+          "sha256": "e2bce238ae59b132b91107719167eeeff5a73d0f6040732608d8f8b9e4f51200"
+        },
+        {
+          "sourcePath": "verification/agent-harness/contract-fixtures.test.ts",
+          "destination": "verification/agent-harness/contract-fixtures.test.ts",
+          "sha256": "522f8487c657cb50afea10081c9f23b05a76395cd8e8610dbbea61b9a1987223"
+        },
+        {
+          "sourcePath": "verification/agent-harness/linux-e2e-gate.test.ts",
+          "destination": "verification/agent-harness/linux-e2e-gate.test.ts",
+          "sha256": "bd3f93a2f62088d24336da75299305f0f587c4574f8c9986536510688fd4014a"
+        },
+        {
+          "sourcePath": "verification/agent-harness/coverage-gate.test.ts",
+          "destination": "verification/agent-harness/coverage-gate.test.ts",
+          "sha256": "e42abb89e22c782ea6957338fec2a133dd89bb2f6fe94fb562065dac4b0b7bc6"
+        },
+        {
+          "sourcePath": "verification/agent-harness/check-capabilities.ts",
+          "destination": "verification/agent-harness/check-capabilities.ts",
+          "sha256": "7135d425fecde042484b0cb8c5ed0cd394c781d0147fdb3f6edf30d6a6969db7"
+        },
+        {
+          "sourcePath": "verification/agent-harness/README.md",
+          "destination": "verification/agent-harness/README.md",
+          "sha256": "6fee537ec87b876939a70e784d1f629cc3e5bd6589d9f44c5b7d5930294c675d"
+        },
+        {
+          "sourcePath": "verification/agent-harness/check-coverage.ts",
+          "destination": "verification/agent-harness/check-coverage.ts",
+          "sha256": "48d6ec55e40e5e28f79f58c869e63b1ac4dc61ce99dd4f472f0a0ca9a94e9a8e"
+        },
+        {
+          "sourcePath": "verification/agent-harness/capability-boundary.test.ts",
+          "destination": "verification/agent-harness/capability-boundary.test.ts",
+          "sha256": "d56c1da93407f9bb08678999411bef7bf3f966d22e2856e460b23bb4f6fe12a4"
+        },
+        {
+          "sourcePath": "verification/agent-harness/check-contract-fixtures.ts",
+          "destination": "verification/agent-harness/check-contract-fixtures.ts",
+          "sha256": "c6402ed5eb84dbd387876527e154f26aa5d2c77898d01db55fd43e6e4c769b7a"
+        },
+        {
+          "sourcePath": "docs/apps/harness.md",
+          "destination": "docs/apps/harness.md",
+          "sha256": "8b97bce9181581c7cbedc8c24760055e1a913d85194ff47d8022c8fb38efc9f6"
+        },
+        {
+          "sourcePath": "docs/superpowers/plans/2026-09-12-harness-candidate-description.md",
+          "destination": "docs/superpowers/plans/2026-09-12-harness-candidate-description.md",
+          "sha256": "d279190184ebfe713e1638360af813a258e03add53b12d31b995f0848817ad20"
+        },
+        {
+          "sourcePath": "tests/support/mod.rs",
+          "destination": "tests/support/mod.rs",
+          "sha256": "cd173d534f9636feaddf9306fa0db2221f456cdabd9fd8fd58e7eb2d61790a96"
+        }
+      ]
+    }
+  ],
+  "sourceWorkflowsActivated": false,
+  "sourceAgentInstructionsImported": false,
+  "qualification": "pending local migration checks"
+}

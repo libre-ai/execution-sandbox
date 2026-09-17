@@ -1,0 +1,36 @@
+{
+  "status": "local-source-composition-not-registry-release",
+  "originalInputs": "code-recovery-provenance.json",
+  "adaptedFiles": [
+    {
+      "path": "Cargo.toml",
+      "originalSha256": "86d569de0aef546cf911cb21e23f360e54503c15354d2414bc925cb06550586c",
+      "currentSha256": "9e1d8a8cb313279e8ac6570dd7b510f5fd201755aac8e8f55500cec564449bce"
+    },
+    {
+      "path": "Cargo.lock",
+      "originalSha256": "c720a288dc84f77957624a264fe104aae81c79c1f525a0a82a15ca1a3ff24026",
+      "currentSha256": "16c420433938816e5e85538d93e314db8c2a8160752de820176f842c1e136ea1"
+    },
+    {
+      "path": "bun.lock",
+      "originalSha256": "56594f9d62314c99bad798fc67e58d78d85d391d5f683f4a4d3c8343af47e387",
+      "currentSha256": "b4e306b41f650b6a518baa481e5d94591284cbe3e1471d099677ac920797a477"
+    },
+    {
+      "path": "package.json",
+      "originalSha256": "353fb252e8e2506c68f1f946c40abdd113cf9b883f9c2246f920be79574c686a",
+      "currentSha256": "ab965d7a1e8d8ba4548501559c989ea472d89d7f3010d2c073eaed55b1070cf7"
+    },
+    {
+      "path": "verification/agent-harness/check-contract-fixtures.ts",
+      "originalSha256": "c6402ed5eb84dbd387876527e154f26aa5d2c77898d01db55fd43e6e4c769b7a",
+      "currentSha256": "053c1df524c512d7e16ccccea87847d035f11d705a823dc26f6a6e4b9abf1f49"
+    }
+  ],
+  "notes": [
+    "Existing APIs and package versions retained.",
+    "Local dependency paths are temporary composition inputs; distribution pins remain to finalize.",
+    "No historical deployment workflows activated."
+  ]
+}

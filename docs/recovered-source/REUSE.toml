@@ -1,0 +1,29 @@
+# REUSE 3.3 manifest of the harness repository (created 2026-08-18, owner
+# decision, domain F chantier A — migrated spec from orchestrator/docs/apps).
+version = 1
+SPDX-PackageName = "harness"
+SPDX-PackageSupplier = "Libre AI <https://github.com/libre-ai>"
+SPDX-PackageDownloadLocation = "https://github.com/libre-ai/harness"
+
+# First-party software by default (LICENSING.md: applications, services,
+# control planes default to EUPL-1.2).
+[[annotations]]
+path = ["**"]
+precedence = "closest"
+SPDX-FileCopyrightText = "2026 Libre AI contributors"
+SPDX-License-Identifier = "EUPL-1.2"
+
+# Editorial documentation and first-party project records (LICENSING.md
+# "Documentation and executable examples").
+[[annotations]]
+path = ["*.md", "**/*.md", "docs/**"]
+precedence = "closest"
+SPDX-FileCopyrightText = "2026 Libre AI contributors"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# Byte-exact contract fixtures retain the canonical authority's licence.
+[[annotations]]
+path = ["fixtures/contracts/**"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Libre AI contributors"
+SPDX-License-Identifier = "Apache-2.0"

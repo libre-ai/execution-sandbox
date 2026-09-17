@@ -1,0 +1,80 @@
+use libre_ai_contract_types::ContractRegistry;
+use libre_ai_harness::{attestation_digest, profile_digest, verify_attestation};
+use serde_json::Value;
+
+// Tracked copies of the pinned authority keep Rust tests independent of Bun.
+// check:contract-fixtures proves exact bytes against the installed authority.
+const DIGEST_VECTORS: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/fixtures/contracts/fixtures/agent-orchestration-v1/digest-vectors.v1.json"
+));
+
+fn vector(id: &str) -> (Value, String) {
+    let document: Value = serde_json::from_str(DIGEST_VECTORS).expect("locked vectors must parse");
+    let entry = document["vectors"]
+        .as_array()
+        .expect("vectors must be an array")
+        .iter()
+        .find(|entry| entry["id"] == id)
+        .expect("the locked vector must exist");
+    (
+        entry["unsignedPayload"].clone(),
+        entry["expectedDigest"]
+            .as_str()
+            .expect("expectedDigest must be a string")
+            .to_owned(),
+    )
+}
+
+#[test]
+fn profile_digest_reproduces_the_locked_harness_profile_vector() {
+    let (payload, expected) = vector("harness-profile-v2");
+    let digest = profile_digest(&payload).expect("the locked payload must digest");
+    assert_eq!(digest, expected);
+}
+
+const SIGNATURE_VECTORS: &str = include_str!(concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/fixtures/contracts/fixtures/agent-orchestration-v1/signature-vectors.v1.json"
+));
+
+#[test]
+fn attestation_digest_reproduces_the_locked_harness_attestation_vector() {
+    let (payload, expected) = vector("harness-attestation");
+    let digest = attestation_digest(&payload).expect("the locked payload must digest");
+    assert_eq!(digest, expected);
+}
+
+#[test]
+fn the_locked_harness_attestation_signature_verifies_and_a_flipped_one_does_not() {
+    let document: Value =
+        serde_json::from_str(SIGNATURE_VECTORS).expect("locked signature vectors must parse");
+    let entry = document["vectors"]
+        .as_array()
+        .expect("vectors must be an array")
+        .iter()
+        .find(|entry| entry["id"] == "harness-attestation")
+        .expect("the harness-attestation signature vector must exist");
+    let public_key = entry["publicKey"]
+        .as_str()
+        .expect("publicKey must be a string");
+    let mut signed = entry["unsignedPayload"].clone();
+    signed["attestationDigest"] = entry["expectedDigest"].clone();
+    signed["signature"] = entry["signature"].clone();
+
+    let registry = ContractRegistry::embedded().expect("embedded contracts must compile");
+    verify_attestation(&registry, &signed, public_key)
+        .expect("the locked signature must verify independently of any run");
+
+    let mut tampered = signed.clone();
+    let original = entry["signature"].as_str().expect("signature is a string");
+    let head = if original.starts_with('A') { "B" } else { "A" };
+    let tail = original
+        .get(1..)
+        .expect("the locked signature is 86 characters long");
+    let flipped = format!("{head}{tail}");
+    tampered["signature"] = Value::String(flipped);
+    let refusal = verify_attestation(&registry, &tampered, public_key)
+        .expect_err("a flipped signature must not verify");
+    assert_eq!(refusal.code(), "harness.attestation_unsigned");
+}

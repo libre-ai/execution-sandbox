@@ -1,0 +1,148 @@
+{
+  "schemaVersion": "libre-ai.agent-attestation-signature-vectors.v1",
+  "algorithm": "Ed25519",
+  "canonicalization": "RFC8785",
+  "vectors": [
+    {
+      "id": "agent-contributor-lineage",
+      "digestField": "lineageDigest",
+      "unsignedPayload": {
+        "schemaVersion": "libre-ai.agent-contributor-lineage.v1",
+        "id": "urn:libre-ai:lineage:lineage-1",
+        "tenantId": "ten_1234567890abcdef",
+        "missionId": "urn:libre-ai:mission:mission-1",
+        "subjectDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "contributors": [
+          {
+            "agentId": "author_agent",
+            "roles": ["author", "executor"],
+            "contributionDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+          }
+        ],
+        "observations": [
+          {
+            "id": "urn:libre-ai:evidence:write-observation-1",
+            "digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "mediaType": "application/json"
+          }
+        ],
+        "generatedAt": "2026-07-16T10:00:00Z",
+        "signingKeyId": "harness_key_1"
+      },
+      "expectedDigest": "14b02bfe3b2448a5cc03cae6ab9a3b4383fd041e2cffe0c03e6fbd260fc7c502",
+      "publicKey": "ebVWLo_mVPlAeLES6KmLp5AfhTrmlb7X4OORC60ElmQ",
+      "signature": "uZujL34Z3qLwbdLbkwKCfnByCe64H3Wj5ZxwfhovCwswgvowlkfOcSPKhjrAQAhOiJUkNlNVsxJnXPlyt39bBg"
+    },
+    {
+      "id": "agent-review-session-attestation",
+      "digestField": "attestationDigest",
+      "unsignedPayload": {
+        "schemaVersion": "libre-ai.agent-review-session-attestation.v1",
+        "id": "urn:libre-ai:attestation:review-session-alpha",
+        "tenantId": "ten_1234567890abcdef",
+        "missionId": "urn:libre-ai:mission:mission-1",
+        "subjectDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "reviewerAgentId": "reviewer_alpha",
+        "reviewerRunId": "urn:libre-ai:run:review-1",
+        "reviewerManifestDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "reviewerPoolId": "pool_alpha",
+        "runtimeFamily": "runtime_alpha",
+        "modelFamily": "model_alpha",
+        "providerId": "provider_alpha",
+        "isolationProfileDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "harnessAttestation": {
+          "id": "urn:libre-ai:attestation:harness-review-alpha",
+          "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "mediaType": "application/json"
+        },
+        "readOnlyWorkspace": true,
+        "sharedMutableState": false,
+        "siblingVerdictDisclosed": false,
+        "issuedAt": "2026-07-16T10:00:00Z",
+        "expiresAt": "2026-07-16T11:05:00Z",
+        "signingKeyId": "harness_key_1"
+      },
+      "expectedDigest": "a0cf9be243cec10c012ed44d463683a150717e333aaf51007c42cfebd1f42f55",
+      "publicKey": "ebVWLo_mVPlAeLES6KmLp5AfhTrmlb7X4OORC60ElmQ",
+      "signature": "PkjihKiylnQ61Odh3DwKyUabGIoEn1hP8xK1YXeabqLV6a-ySfeYLpAsR0clqo5wuSiSfy2pKvnjWTv3vptfCA"
+    },
+    {
+      "id": "agent-review",
+      "digestField": "preimageDigest",
+      "unsignedPayload": {
+        "schemaVersion": "libre-ai.agent-review.v1",
+        "id": "urn:libre-ai:review:review-1",
+        "tenantId": "ten_1234567890abcdef",
+        "missionId": "urn:libre-ai:mission:mission-1",
+        "subjectType": "execution-plan",
+        "subjectDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "evidence": [
+          {
+            "id": "urn:libre-ai:evidence:plan-proof-1",
+            "digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+            "mediaType": "application/json"
+          }
+        ],
+        "contributorLineage": {
+          "id": "urn:libre-ai:lineage:lineage-1",
+          "digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "mediaType": "application/json"
+        },
+        "contributorAgentIds": ["author_agent"],
+        "reviewerAgentId": "reviewer_alpha",
+        "reviewerRunId": "urn:libre-ai:run:review-1",
+        "reviewerManifestDigest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+        "reviewerPoolId": "pool_alpha",
+        "runtimeFamily": "runtime_alpha",
+        "modelFamily": "model_alpha",
+        "providerId": "provider_alpha",
+        "isolationProfileDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "reviewSessionAttestation": {
+          "id": "urn:libre-ai:attestation:review-session-alpha",
+          "digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "mediaType": "application/json"
+        },
+        "blindReview": true,
+        "verdict": "approve",
+        "summary": [],
+        "nonce": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "issuedAt": "2026-07-16T10:05:00Z",
+        "expiresAt": "2026-07-16T11:05:00Z",
+        "signingKeyId": "review_key_1"
+      },
+      "expectedDigest": "30a75fe8655b4c8f02f736d2c21fd2d4d5c8b9381f2d1c9a581be9282fc56a76",
+      "publicKey": "ebVWLo_mVPlAeLES6KmLp5AfhTrmlb7X4OORC60ElmQ",
+      "signature": "3GF2o-9Qf13eWDL5WBNksmOKMbAb2XP1EbagAFcyiU-cFyA6Hkya44XQbUyQoMPQ2_0MRG4Jd1Q-7J_WXhKiDg"
+    },
+    {
+      "id": "harness-attestation",
+      "digestField": "attestationDigest",
+      "unsignedPayload": {
+        "schemaVersion": "libre-ai.harness-attestation.v1",
+        "id": "urn:libre-ai:attestation:harness-run-1",
+        "tenantId": "ten_1234567890abcdef",
+        "missionId": "urn:libre-ai:mission:mission-1",
+        "runId": "urn:libre-ai:run:run-1",
+        "planDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "requestedProfileDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "effectiveProfileDigest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "workerManifestDigests": [
+          "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+        ],
+        "sandboxEngineManifest": {
+          "id": "urn:libre-ai:manifest:sandbox-engine-1",
+          "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "mediaType": "application/json"
+        },
+        "platform": "linux-x86_64",
+        "effectiveControls": ["filesystem_mounts", "process_isolation", "resource_limits"],
+        "networkMode": "private-gateway-only",
+        "generatedAt": "2026-07-16T10:11:00Z",
+        "signingKeyId": "harness_key_1"
+      },
+      "expectedDigest": "4526db2090e490eafc8bd5deeb08aabc39b3e0860c79b5a3f5bb287359f68c78",
+      "publicKey": "ebVWLo_mVPlAeLES6KmLp5AfhTrmlb7X4OORC60ElmQ",
+      "signature": "5RlhWOWkdLt492pSsV0aHcN9fl0PeK5UtKk7MXVzCiV291WDk6HtokwS8afam-QDnCQ-bgGYaPlvC50yMkWXCg"
+    }
+  ]
+}

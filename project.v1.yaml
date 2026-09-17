@@ -1,0 +1,78 @@
+# Fiche d'état du projet — autorité de l'état depuis ADR-0020 (design §6.2).
+# La section statut du README est générée depuis cette fiche (sentinelles).
+schema_version: libre-ai.project.v1
+project: harness
+repository: libre-ai/harness
+kind: satellite
+layer: couche-2
+statement:
+  for: "les orchestrateurs et opérateurs qui doivent confier l'exécution d'un worker à un tiers sans pouvoir vérifier eux-mêmes, après coup, ce qui a réellement été appliqué"
+  who_faces: "une frontière qu'un worker confiné pourrait franchir sans que personne ne le sache, et une attestation qui pourrait affirmer un confinement qu'elle n'a pas réellement enforcé"
+  enables: "prouver — pas seulement affirmer — qu'un profil de confinement demandé a été réellement appliqué, par une attestation signée vérifiable indépendamment de la course qui l'a produite"
+  producing:
+    - "Une bibliothèque Rust candidate : parsing et résolution de profil, contrôles effectifs, politique filesystem, plafonds et scan de sorties, signature et vérification d'attestation, types de refus et plan de confinement."
+    - "Un module hôte src/host/ pour l'exécution locale bornée et le chemin de confinement attesté ; sa présence ne constitue pas une qualification Linux ni une admission du garde."
+    - "La spécification produit docs/apps/harness.md sous Specification Lock, et une frontière de capacités vérifiée par verification/agent-harness/check-capabilities.ts."
+  without_depending_on:
+    - "Aucune décision de confinement déléguée au worker ; aucun ordonnanceur ou provider intégré par cette bibliothèque."
+    - "Aucune installation Bun requise pour compiler et tester Rust : les trois entrées de test Contracts sont suivies et contrôlées contre l'autorité épinglée, sans devenir une nouvelle autorité."
+summary: "Bibliothèque candidate de confinement attesté : cœur Rust et module hôte présents, dépendances explicitement bornées, qualification Linux et admission du garde encore ouvertes."
+current_situation: >-
+  Le candidat contient le cœur de profil, contrôles et attestation ainsi qu'un runtime hôte,
+  et non plus seulement le bootstrap sans effet. La réconciliation e724b589 a conservé
+  cette surface et réparé les assertions et entrées de test contractuelles.
+  La présente actualisation est documentaire : la maturité, l'exposition et les trois
+  phases pending sont conservées, sans décision de livraison implicite. Les tests macOS
+  du confinement attesté vérifient PlatformUnsupported ; le parcours Linux privilégié,
+  la couverture bloquante et l'intégration Mission Control restent non qualifiés ici.
+scope:
+  - "Bibliothèque publique src/lib.rs : profils et digests, contrôles, politique de chemins, registre de sorties, plan de confinement, signature/vérification d'attestation et API hôte d'exécution bornée."
+  - "Spécification produit sous Specification Lock : docs/apps/harness.md, vérifiée par check:specifications --apps harness ; inchangée par cette réconciliation documentaire."
+  - "Frontière de capacités : six noms de dépendances autorisés dans Cargo.toml ; capacités processus/filesystem/temps réservées à src/host/, accès environnement/TCP/UDP et points d'entrée binaires refusés par le gate."
+  - "Qualification conservée comme limite : les essais hôte et le refus de plateforme macOS ne démontrent pas une exécution confinée attestée Linux, ni une intégration au parcours Mission Control."
+non_goals:
+  - "Faire confiance au worker : aucune décision de confinement n'est déléguée au processus confiné (docs/apps/harness.md §Non-goals)."
+  - "Confinement best-effort : un contrôle qui ne peut pas être appliqué est un refus, jamais un avertissement suivi d'exécution."
+  - "Attester ce qui n'a pas été appliqué : l’attestation doit enregistrer les contrôles effectifs, jamais les contrôles voulus."
+  - "Élargir la surface réseau, secrets ou providers : cette actualisation ne change aucune capacité ; une nouvelle capacité exige son propre package et sa revue."
+  - "Être un ordonnanceur : séquencement, budgets et liveness appartiennent à l'orchestrateur, jamais à ce dépôt."
+dependencies:
+  - on: libre-ai/governance
+    why: "gabarit de gates consommé en workflows réutilisables et git-dep d'outillage — jamais dupliqué"
+    pinned: "github:libre-ai/governance#767ee84aabfab27be29adb9606584e76e15243b6"
+  - on: libre-ai/contracts
+    why: "autorité contractuelle épinglée pour les fixtures suivies et leur contrôle de dérive ; pas de redéfinition locale"
+    pinned: "github:libre-ai/contracts#af6ea32c48bd470694e9bf5f8787f417f8a781a6"
+  - on: libre-ai/sdk-rs
+    why: "types contractuels Rust consommés par la bibliothèque via Cargo"
+    pinned: "github:libre-ai/sdk-rs#6a29fb59e475304b4cacfd79f2a5519352a98322"
+maturity: specified
+confidence: medium
+exposure: spec-published
+freshness:
+  last_verified_on: "2026-09-12"
+scope_stability: stable
+benchmark:
+  none: "n/a (frontière de confinement interne à la constellation, pas de cible de parité externe)"
+phases:
+  - id: profile-attestation-core
+    title: "Profile and attestation core (WP1)"
+    exit_criteria:
+      - id: profile-and-attestation-types
+        text: "Profile parsing/digesting et attestation assembly/verification livrés en cœur Rust pur et sans hôte, avec leur suite adversariale (docs/apps/harness.md §Work packages, item 1)."
+        weight: 1
+        status: pending
+  - id: filesystem-confinement
+    title: "Filesystem confinement (WP2, bootstrap hard stop)"
+    exit_criteria:
+      - id: canonicalization-and-enforcement
+        text: "Canonicalisation des chemins, politique de liens symboliques et application read-only/writable/denied sur un hôte réel — premier merge sécurité-critique de cette surface, gated par un arrêt dur propriétaire d'amorçage (ADR-0011 D4)."
+        weight: 1
+        status: pending
+  - id: bounded-process-execution
+    title: "Bounded process execution (WP3)"
+    exit_criteria:
+      - id: confined-spawn-and-attestation-emission
+        text: "Spawn, capture de sortie, plafonds par outil et total, scan fail-closed et émission d'attestation livrés ensemble, ouvrant la première capacité runtime réelle (ADR-0018 D2 : processus local, sans réseau ni secret)."
+        weight: 1
+        status: pending
