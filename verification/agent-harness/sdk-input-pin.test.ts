@@ -14,7 +14,7 @@ test("local SDK is the reviewed current schemas-and-contracts composition", asyn
   expect(pin.files.length).toBe(113);
   expect(await Bun.file("Cargo.toml").text()).toContain(`path = "${root}"`);
   expect(await digest(pinPath)).toBe(
-    "a2fc1b2f5fb0bad6414b696e2ee76d8e9203119aa49ca454a8646bc46b566196",
+    "0a5c5a90b879f31b572d91a94202336b960322ef84a26637a96584791def5033",
   );
   for (const file of pin.files) {
     expect(file.path.startsWith("/") || file.path.split("/").includes("..")).toBe(false);
