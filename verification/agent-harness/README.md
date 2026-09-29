@@ -34,3 +34,15 @@ and that capability lives in `src/host/` alone. Everything else is pure and host
 Every future capability this crate opens edits `check-capabilities.ts` in the same pull request
 that adds the dependency or import the gate would otherwise reject — the allowlist and the runtime
 surface move together, never one behind the other.
+
+## Network admission limit
+
+The source capability gate constrains this library; it does not intercept the
+worker executable's network syscalls. `run_confined_attested` therefore refuses
+otherwise admissible execution with `ControlNotEnforceable` before worker I/O or
+spawn. The attestation contract has no mode for an unenforced network boundary.
+The `attestation` phase of `check-linux-e2e.sh` fails before tests: successful
+refusal tests cannot qualify a positive Linux attestation. The `refusal` phase
+still requires Linux, no arranged worker identity, a successful process exit
+and exactly three executed tests without ignored or filtered cases. Process
+and transport mechanics continue to be tested separately in `host_process`.

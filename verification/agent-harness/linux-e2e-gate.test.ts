@@ -38,14 +38,14 @@ esac`,
     for (const [name, body] of Object.entries(commands)) {
       writeFileSync(join(root, name), `#!/bin/sh\n${body}\n`, { mode: 0o700 });
     }
-    const execution = Bun.spawnSync(["/bin/sh", script, options.phase ?? "attestation"], {
+    const execution = Bun.spawnSync(["/bin/sh", script, options.phase ?? "refusal"], {
       env: {
         PATH: `${root}:/usr/bin:/bin`,
         PROBE_PLATFORM: options.platform ?? "Linux",
         PROBE_ROOT_UID: options.rootUid ?? "0",
-        PROBE_WORKER_UID: options.workerUid ?? "24001",
+        PROBE_WORKER_UID: options.workerUid ?? "",
         PROBE_WORKER_GID: options.workerGid ?? "24001",
-        PROBE_TRANSITION_UID: options.transitionUid ?? options.workerUid ?? "24001",
+        PROBE_TRANSITION_UID: options.transitionUid ?? options.workerUid ?? "",
         PROBE_TRANSITION_EXIT: options.transitionExit ?? "0",
         PROBE_CARGO_EXIT: options.cargoExit ?? "0",
         PROBE_SUMMARY: options.summary ?? success,
@@ -61,25 +61,12 @@ esac`,
   }
 }
 
-test("an attestation run requires Linux before starting tests", () => {
+test("a refusal run requires Linux before starting tests", () => {
   expect(probe({ platform: "Darwin" })).toEqual({ exit: 1, testsStarted: false });
 });
 
-test("an attestation run requires root and a non-root worker identity", () => {
-  for (const options of [
-    { rootUid: "1000" },
-    { workerUid: "" },
-    { workerUid: "0" },
-    { workerGid: "0" },
-  ]) {
-    const result = probe(options);
-    expect(result.exit).not.toBe(0);
-    expect(result.testsStarted).toBe(false);
-  }
-});
-
 test("a refusal run rejects an already arranged worker identity", () => {
-  const result = probe({ phase: "refusal" });
+  const result = probe({ phase: "refusal", workerUid: "24001" });
   expect(result.exit).not.toBe(0);
   expect(result.testsStarted).toBe(false);
 });
@@ -99,8 +86,11 @@ test("a failing process cannot borrow a successful summary", () => {
   expect(probe({ cargoExit: "1" }).exit).not.toBe(0);
 });
 
-test("an equipped attestation run needs process and semantic success", () => {
-  expect(probe()).toEqual({ exit: 0, testsStarted: true });
+test("an equipped host cannot qualify attestation without worker network isolation", () => {
+  expect(probe({ phase: "attestation", workerUid: "24001" })).toEqual({
+    exit: 1,
+    testsStarted: false,
+  });
 });
 
 test("a refusal run proves the identity is absent and still checks assertions", () => {
@@ -108,12 +98,4 @@ test("a refusal run proves the identity is absent and still checks assertions", 
     exit: 0,
     testsStarted: true,
   });
-});
-
-test("an absent or wrong privilege transition is refused before tests", () => {
-  for (const options of [{ transitionExit: "1" }, { transitionUid: "65534" }]) {
-    const result = probe(options);
-    expect(result.exit).not.toBe(0);
-    expect(result.testsStarted).toBe(false);
-  }
 });

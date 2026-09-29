@@ -45,20 +45,23 @@ fn the_canonical_increment_profile_is_self_consistent() {
 }
 
 #[test]
-fn resolves_every_prescribed_control_on_a_fully_equipped_linux_host() {
-    let profile = parse_profile(&registry(), &canonical_document())
-        .expect("the canonical profile must parse");
-    let effective =
-        resolve_controls(&profile, &full_facts()).expect("every prescribed control is enforceable");
-    assert_eq!(
-        effective.identifiers(),
-        &[
-            "output_bounds".to_owned(),
-            "process_isolation".to_owned(),
-            "resource_limits".to_owned(),
-        ],
-        "the ledger lists what is enforced, and filesystem_confinement is not"
-    );
+fn an_equipped_linux_host_cannot_attest_without_worker_network_isolation() {
+    for platform in ["linux-x86_64", "linux-aarch64"] {
+        for capabilities in [
+            serde_json::json!(["output_bounds", "process_isolation", "resource_limits"]),
+            serde_json::json!(["output_bounds"]),
+        ] {
+            let mut document = canonical_document();
+            document["sandboxEngine"]["requiredCapabilities"] = capabilities;
+            let profile = parse_profile(&registry(), &with_digest_recomputed(document))
+                .expect("the selected capabilities satisfy the locked profile schema");
+            let refusal = resolve_controls(&profile, &HostFacts::new(platform, true, true))
+                .expect_err(
+                    "process wrappers cannot establish the mandatory attested network mode",
+                );
+            assert_eq!(refusal.code(), "harness.control_not_enforceable");
+        }
+    }
 }
 
 #[test]

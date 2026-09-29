@@ -120,6 +120,11 @@ fn host_plan(dedicated_uid: Option<u32>, dedicated_gid: Option<u32>) -> Confinem
 /// control this host cannot honestly enforce, run the worker confined, hold
 /// its output to the profile's bounds, and emit the signed attestation that
 /// binds what was asked to what was actually enforced.
+///
+/// Currently returns `ControlNotEnforceable` on otherwise admissible hosts,
+/// before worker I/O or spawn: neither supported attestation network mode is
+/// enforced by this engine. Unsupported platforms and invalid profiles retain
+/// their specific refusals. The lower-level process API is not a network sandbox.
 #[expect(
     clippy::too_many_arguments,
     reason = "one parameter per bound input, by design"
@@ -143,6 +148,8 @@ pub fn run_confined_attested(
     let profile = resolved.profile();
     let plan = host_plan(dedicated_uid, dedicated_gid);
     let facts = gather_host_facts();
+    // Admission must establish every signed guarantee before even reading the
+    // worker executable. The current engine cannot attest a network mode.
     let effective = resolve_controls(profile, &facts)?;
     // The workspace is canonicalized and becomes the worker's starting
     // directory. It is NOT a boundary: nothing here bounds the worker's own
@@ -224,7 +231,7 @@ pub fn run_confined_attested(
         engine_manifest,
         PLATFORM,
         effective.identifiers().to_vec(),
-        "none",
+        effective.network_mode(),
         generated_at,
         &identity.signing_key_id,
     );

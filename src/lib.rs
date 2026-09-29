@@ -6,7 +6,9 @@
 //! prescribes, runs the work inside them, and emits a signed attestation
 //! binding what was asked to what was actually enforced. Its value is not
 //! that it restricts — it is that it proves it restricted
-//! (`docs/apps/harness.md`).
+//! (`docs/apps/harness.md`). Currently the attested-run API refuses before
+//! worker I/O or spawn because the engine cannot enforce a contractual network
+//! mode. The lower-level process API is not a filesystem or network sandbox.
 //!
 //! Everything outside `host` is pure and hostless; `host` holds exactly one
 //! OS capability at this stage — spawning a confined local process. The

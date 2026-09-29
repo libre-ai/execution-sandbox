@@ -10,16 +10,10 @@ case "$1" in
         fi
         ;;
     attestation)
-        test "$(id -u)" = 0
-        worker_uid=$(id -u harness-worker)
-        worker_gid=$(id -g harness-worker)
-        case "$worker_uid:$worker_gid" in *[!0-9:]*|:*) exit 1 ;; esac
-        test "$worker_uid" -gt 0
-        test "$worker_gid" -gt 0
-        # Exercise the actual identity/capability transition before accepting
-        # the test's equipped-host branch as attestation evidence.
-        actual_uid=$(setpriv --no-new-privs --reuid="$worker_uid" --regid="$worker_gid" --clear-groups --inh-caps=-all --ambient-caps=-all --bounding-set=-all /usr/bin/id -u)
-        test "$actual_uid" = "$worker_uid"
+        # Passing refusal tests must never qualify a positive attestation.
+        # Reopening this mode requires an enforced worker network boundary.
+        printf '%s\n' 'Attestation qualification unavailable: worker network isolation is not enforced' >&2
+        exit 1
         ;;
     *) exit 2 ;;
 esac

@@ -66,6 +66,7 @@ impl HostFacts {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct EffectiveControls {
     identifiers: Vec<String>,
+    network_mode: &'static str,
 }
 
 impl EffectiveControls {
@@ -73,6 +74,18 @@ impl EffectiveControls {
     pub fn identifiers(&self) -> &[String] {
         &self.identifiers
     }
+
+    pub(crate) const fn network_mode(&self) -> &'static str {
+        self.network_mode
+    }
+}
+
+/// Attestation v1 requires an enforced network mode. Process wrappers and an
+/// anonymous transport do not restrict the worker's own network syscalls.
+/// No mode is admitted until this engine implements and verifies that boundary;
+/// the caller cannot opt into a guarantee with an asserted host fact.
+fn enforced_network_mode() -> Result<&'static str, HarnessRefusal> {
+    Err(HarnessRefusal::ControlNotEnforceable)
 }
 
 const fn capability_enforceable(capability: &str, facts: &HostFacts) -> bool {
@@ -88,6 +101,8 @@ const fn capability_enforceable(capability: &str, facts: &HostFacts) -> bool {
 /// Journey 2 of the specification: every control the profile prescribes is
 /// either applied or the run is refused — a control that cannot be applied is
 /// `harness.control_not_enforceable`, never a warning followed by execution.
+/// This includes the mandatory attestation network mode: the current engine
+/// cannot establish one, so even an equipped Linux host is refused.
 pub fn resolve_controls(
     profile: &HarnessProfile,
     facts: &HostFacts,
@@ -116,7 +131,6 @@ pub fn resolve_controls(
         return Err(HarnessRefusal::ControlNotEnforceable);
     }
 
-    let mut identifiers: Vec<String> = Vec::with_capacity(profile.required_capabilities().len());
     for capability in profile.required_capabilities() {
         if !ENGINE_CAPABILITIES.contains(&capability.as_str()) {
             return Err(HarnessRefusal::ControlNotEnforceable);
@@ -124,8 +138,12 @@ pub fn resolve_controls(
         if !capability_enforceable(capability, facts) {
             return Err(HarnessRefusal::ControlNotEnforceable);
         }
-        identifiers.push(capability.clone());
     }
+    let network_mode = enforced_network_mode()?;
+    let mut identifiers = profile.required_capabilities().to_vec();
     identifiers.sort();
-    Ok(EffectiveControls { identifiers })
+    Ok(EffectiveControls {
+        identifiers,
+        network_mode,
+    })
 }
