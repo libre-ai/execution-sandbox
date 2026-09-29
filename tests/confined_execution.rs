@@ -2,10 +2,10 @@ mod support;
 
 use libre_ai_contract_types::ContractRegistry;
 use libre_ai_harness::{
-    HarnessRefusal, RunError, RunIdentity, profile_digest, public_key_base64url,
-    run_confined_attested, verify_attestation,
+    HarnessRefusal, RunError, RunIdentity, profile_digest, run_confined_attested,
 };
 use serde_json::Value;
+use std::os::unix::fs::PermissionsExt;
 use std::path::Path;
 use std::process::Command;
 
@@ -45,7 +45,7 @@ fn dedicated_identity() -> Option<(u32, u32)> {
 }
 
 #[test]
-fn the_first_confined_execution_is_attested_or_exactly_refused() {
+fn an_attested_run_is_refused_before_the_worker_can_start() {
     let registry = ContractRegistry::embedded().expect("embedded contracts must compile");
     let document: Value =
         serde_json::from_str(CANONICAL_PROFILE).expect("the canonical profile must parse");
@@ -55,7 +55,15 @@ fn the_first_confined_execution_is_attested_or_exactly_refused() {
     let _ = std::fs::remove_dir_all(&workspace);
     std::fs::create_dir_all(workspace.join("out")).expect("the workspace must build");
 
+    // A dedicated worker could write this synthetic sentinel on an equipped
+    // host; absent output must establish admission, not a DAC write failure.
+    std::fs::set_permissions(&workspace, std::fs::Permissions::from_mode(0o755))
+        .expect("make the owned workspace traversable by the dedicated identity");
+    let marker_directory = workspace.join("out");
+    std::fs::set_permissions(&marker_directory, std::fs::Permissions::from_mode(0o777))
+        .expect("make the owned synthetic marker directory writable");
     let identity = dedicated_identity();
+    let marker = marker_directory.join("worker-started");
     let result = run_confined_attested(
         &registry,
         &document,
@@ -63,7 +71,12 @@ fn the_first_confined_execution_is_attested_or_exactly_refused() {
         &digest,
         &workspace,
         Path::new("/bin/sh"),
-        &support::echo_after_leader_exit_args(0),
+        &[
+            "-c".to_owned(),
+            "printf started > \"$1\"".to_owned(),
+            "worker-probe".to_owned(),
+            marker.to_string_lossy().into_owned(),
+        ],
         b"bootstrap-payload",
         identity.map(|(uid, _)| uid),
         identity.map(|(_, gid)| gid),
@@ -73,62 +86,28 @@ fn the_first_confined_execution_is_attested_or_exactly_refused() {
     );
 
     if cfg!(target_os = "linux") {
-        if identity.is_some() {
-            // The bootstrap path: a real confined run, attested and
-            // independently verifiable (ADR-0018 D2).
-            let attestation = result.expect("the fully equipped host attests the run");
-            let public_key = public_key_base64url(&SIGNING_SEED);
-            verify_attestation(&registry, &attestation, &public_key)
-                .expect("the attestation verifies without the run that produced it");
-            // Compared to what this build targets, never to the architecture
-            // the CI runner happens to be (K4 architecture verdict, minor 3).
-            let expected = if cfg!(target_arch = "x86_64") {
-                "linux-x86_64"
-            } else {
-                "linux-aarch64"
-            };
-            assert_eq!(attestation["platform"], expected);
-            assert_eq!(attestation["networkMode"], "none");
-            // The attestation states a narrower effective profile than the
-            // one requested, because this engine applies less than the
-            // locked contract prescribes.
-            assert_ne!(
-                attestation["requestedProfileDigest"], attestation["effectiveProfileDigest"],
-                "an unapplied block must not travel as effective"
-            );
-            assert_eq!(
-                attestation["effectiveProfileDigest"],
-                libre_ai_harness::effective_profile_digest(&document)
-                    .expect("the applied surface must digest")
-            );
-            // The ledger is exact: what the engine applies, and nothing more.
-            assert_eq!(
-                attestation["effectiveControls"],
-                serde_json::json!(["output_bounds", "process_isolation", "resource_limits"])
-            );
-        } else {
-            // Linux without the arranged identity: refused, never degraded.
-            assert_eq!(
-                result.expect_err("missing privileges must refuse"),
-                RunError::Refused(HarnessRefusal::ControlNotEnforceable)
-            );
-        }
+        assert_eq!(
+            result.expect_err("identity and process limits do not establish network isolation"),
+            RunError::Refused(HarnessRefusal::ControlNotEnforceable)
+        );
     } else {
-        // The canonical increment profile names Linux only: every other
-        // platform is refused before anything starts.
         assert_eq!(
             result.expect_err("a platform outside the profile must refuse"),
             RunError::Refused(HarnessRefusal::PlatformUnsupported)
         );
     }
+    assert!(
+        !marker.exists(),
+        "refused admission must not start the worker"
+    );
 
     let _ = std::fs::remove_dir_all(&workspace);
 }
 
-/// These negative journeys exercise the public attested-run API. On the
-/// equipped Linux runner, complete transport data must never manufacture an
-/// attestation for a failed worker or an unbound response.
-fn assert_worker_error(program: &Path, args: &[String], expected: RunError, case: &str) {
+/// These public API journeys now stop at network admission. The lower-level
+/// host_process suite retains native-failure and run-binding assertions; these
+/// refusals must not be represented as evidence that either worker ran.
+fn assert_worker_error(program: &Path, args: &[String], case: &str) {
     let registry = ContractRegistry::embedded().expect("embedded contracts must compile");
     let document: Value =
         serde_json::from_str(CANONICAL_PROFILE).expect("the canonical profile must parse");
@@ -154,14 +133,10 @@ fn assert_worker_error(program: &Path, args: &[String], expected: RunError, case
     std::fs::remove_dir_all(&workspace).expect("remove the owned test workspace");
     let actual = result.expect_err("a failed or unbound worker cannot produce an attestation");
     if cfg!(target_os = "linux") {
-        if identity.is_some() {
-            assert_eq!(actual, expected);
-        } else {
-            assert_eq!(
-                actual,
-                RunError::Refused(HarnessRefusal::ControlNotEnforceable)
-            );
-        }
+        assert_eq!(
+            actual,
+            RunError::Refused(HarnessRefusal::ControlNotEnforceable)
+        );
     } else {
         assert_eq!(
             actual,
@@ -175,7 +150,6 @@ fn a_complete_bound_response_from_a_failed_worker_is_not_attested() {
     assert_worker_error(
         Path::new("/bin/sh"),
         &support::echo_after_leader_exit_args(7),
-        RunError::WorkerFault,
         "native-failure",
     );
 }
@@ -188,7 +162,6 @@ fn an_unbound_worker_response_is_not_attested() {
             "-c".to_owned(),
             "/bin/cat >/dev/null && printf unbound-response".to_owned(),
         ],
-        RunError::RunBindingUnproved,
         "unbound-response",
     );
 }

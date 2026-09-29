@@ -18,4 +18,14 @@ Les développeurs qui exécutent des tâches automatisées doivent préciser les
 
 Ce dépôt contient du code source et des tests ; aucun paquet n’est publié dans un registre.
 
+L’exécution attestée refuse actuellement de démarrer le processus : le moteur ne
+peut imposer aucun des modes réseau exigés par le contrat d’attestation. Un hôte
+Linux compatible reçoit `harness.control_not_enforceable` ; une plateforme non
+prise en charge conserve `harness.platform_unsupported`. L’API de processus de
+bas niveau applique des contrôles d’identité, de durée et de sortie, mais n’isole
+pas les accès directs aux fichiers ou au réseau. Ses tests ne qualifient ni un
+sandbox pour code non fiable, ni l’attestation Linux, ni une baseline de
+couverture. La phase de qualification Linux `attestation` reste explicitement
+indisponible.
+
 Découvrez le [catalogue des projets Libre AI](https://github.com/libre-ai/.github/blob/main/profile/README.fr.md).
