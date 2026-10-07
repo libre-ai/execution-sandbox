@@ -2,7 +2,7 @@
 # La section statut du README est générée depuis cette fiche (sentinelles).
 schema_version: libre-ai.project.v1
 project: harness
-repository: libre-ai/harness
+repository: libre-ai/execution-sandbox
 kind: satellite
 layer: couche-2
 statement:
@@ -37,15 +37,26 @@ non_goals:
   - "Élargir la surface réseau, secrets ou providers : cette actualisation ne change aucune capacité ; une nouvelle capacité exige son propre package et sa revue."
   - "Être un ordonnanceur : séquencement, budgets et liveness appartiennent à l'orchestrateur, jamais à ce dépôt."
 dependencies:
-  - on: libre-ai/governance
+  - on: libre-ai/project-governance
+    # 2026-10-07 : le dépôt nommé ici a été retiré (ADR-0041). Le pin précédent
+    # désignait un commit désormais inatteignable ; il nomme son successeur, à une
+    # révision qui existe. Aucun manifeste de ce dépôt ne dépendait du retiré :
+    # mesuré sur 105 manifestes des 29 dépôts de l'organisation.
     why: "gabarit de gates consommé en workflows réutilisables et git-dep d'outillage — jamais dupliqué"
-    pinned: "github:libre-ai/governance#767ee84aabfab27be29adb9606584e76e15243b6"
-  - on: libre-ai/contracts
+    pinned: "github:libre-ai/project-governance#2024a4884b314df99be457618be9c3b48a0287f7"
+  - on: libre-ai/schemas-and-contracts
+    # 2026-10-07 : le dépôt nommé ici a été retiré (ADR-0041). Le pin précédent
+    # désignait un commit désormais inatteignable ; il nomme son successeur, à une
+    # révision qui existe. Aucun manifeste de ce dépôt ne dépendait du retiré :
+    # mesuré sur 105 manifestes des 29 dépôts de l'organisation.
     why: "autorité contractuelle épinglée pour les fixtures suivies et leur contrôle de dérive ; pas de redéfinition locale"
-    pinned: "github:libre-ai/contracts#af6ea32c48bd470694e9bf5f8787f417f8a781a6"
-  - on: libre-ai/sdk-rs
-    why: "types contractuels Rust consommés par la bibliothèque via Cargo"
-    pinned: "github:libre-ai/sdk-rs#6a29fb59e475304b4cacfd79f2a5519352a98322"
+    pinned: "github:libre-ai/schemas-and-contracts#d2767988c7b1a00b304b76c5d5ac92b93898bf30"
+  - on: libre-ai/schemas-and-contracts
+    # 2026-10-07 : `libre-ai/sdk-rs` a été retiré (ADR-0041) et ses projections
+    # SDK vivent dans `schemas-and-contracts`. Aucun Cargo.toml de ce dépôt ne le
+    # déclarait : l'entrée était une intention, pas une dépendance de build.
+    why: "projections SDK Rust des contrats, destinées à être consommées par la bibliothèque via Cargo"
+    pinned: "github:libre-ai/schemas-and-contracts#d2767988c7b1a00b304b76c5d5ac92b93898bf30"
 maturity: specified
 confidence: medium
 exposure: spec-published
