@@ -16,6 +16,18 @@ Developers running automated workers need to specify which resources a workload 
 
 ## Availability
 
+<!-- libre-ai:project-status:begin -->
+<!-- Section générée depuis project.v1.yaml — ne pas éditer à la main. -->
+
+- Situation actuelle : Le candidat contient le cœur de profil, contrôles et attestation ainsi qu'un runtime hôte, et non plus seulement le bootstrap sans effet. La réconciliation e724b589 a conservé cette surface et réparé les assertions et entrées de test contractuelles. La présente actualisation est documentaire : la maturité, l'exposition et les trois phases pending sont conservées, sans décision de livraison implicite. Les tests macOS du confinement attesté vérifient PlatformUnsupported ; le parcours Linux privilégié, la couverture bloquante et l'intégration Mission Control restent non qualifiés ici.
+- Maturité : specified
+- Exposition : spec-published
+- Confiance : medium
+- Preuves vérifiées le : 2026-09-12
+- Avancement : 0 % du périmètre actuellement déclaré
+
+<!-- libre-ai:project-status:end -->
+
 Source code and tests are available in this repository; no package is published to a registry.
 
 Attested execution currently refuses before starting a worker: the process engine
