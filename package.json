@@ -34,6 +34,7 @@
     "check:contract-fixtures": "bun run check:bun:runtime && bun test verification/agent-harness/contract-fixtures.test.ts verification/agent-harness/sdk-input-pin.test.ts && bun verification/agent-harness/check-contract-fixtures.ts",
     "check:linux-e2e-gate": "bun run check:bun:runtime && bun test verification/agent-harness/linux-e2e-gate.test.ts",
     "check:coverage-gate": "bun run check:bun:runtime && bun test verification/agent-harness/coverage-gate.test.ts",
-    "check:rust": "bun run check:bun:runtime && cargo fmt --all --check && cargo clippy --locked --all-targets --all-features -- -D warnings && cargo test --locked --all-features"
+    "check:dependency-policy": "bun run check:bun:runtime && bun test tools/quality/check-dependency-policy.test.ts && bun tools/quality/check-dependency-policy.ts",
+    "check:rust": "bun run check:bun:runtime && bun run check:dependency-policy && cargo fmt --all --check && cargo clippy --locked --all-targets --all-features -- -D warnings && cargo test --locked --all-features"
   }
 }
