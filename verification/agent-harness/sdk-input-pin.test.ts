@@ -12,7 +12,18 @@ test("local SDK is the reviewed current schemas-and-contracts composition", asyn
     await Bun.file(pinPath).json();
   expect(pin.origin).toBe("schemas-and-contracts/crates/sdk-rs");
   expect(pin.files.length).toBe(113);
-  expect(await Bun.file("Cargo.toml").text()).toContain(`path = "${root}"`);
+  // The manifest pins the composed revision by git so Dependabot can resolve
+  // it; the composition compiles this very sibling checkout in its place.
+  const cargo = await Bun.file("Cargo.toml").text();
+  expect(cargo).not.toContain('path = "../');
+  const declared = cargo.match(
+    /git = "https:\/\/github\.com\/libre-ai\/schemas-and-contracts", rev = "([0-9a-f]{40})"/,
+  );
+  expect(declared?.[1]).toBe(
+    Bun.spawnSync(["git", "-C", "../schemas-and-contracts", "rev-parse", "HEAD"])
+      .stdout.toString()
+      .trim(),
+  );
   expect(await digest(pinPath)).toBe(
     "0a5c5a90b879f31b572d91a94202336b960322ef84a26637a96584791def5033",
   );
