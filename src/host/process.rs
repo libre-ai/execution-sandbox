@@ -159,7 +159,9 @@ pub fn spawn_confined(
             Err(error)
                 if matches!(
                     error.kind(),
-                    std::io::ErrorKind::WouldBlock | std::io::ErrorKind::TimedOut
+                    std::io::ErrorKind::WouldBlock
+                        | std::io::ErrorKind::TimedOut
+                        | std::io::ErrorKind::Interrupted
                 ) => {}
             // EPIPE and friends: the worker is gone, which a worker that has
             // already answered legitimately is. Read what it left rather
@@ -236,6 +238,10 @@ pub fn spawn_confined(
             }
             Err(error) if error.kind() == std::io::ErrorKind::WouldBlock => {}
             Err(error) if error.kind() == std::io::ErrorKind::TimedOut => {}
+            // A signal interrupted the call: Linux does not restart a socket
+            // read armed with SO_RCVTIMEO after a stop/continue. The
+            // transport is intact, so look at the clocks and read again.
+            Err(error) if error.kind() == std::io::ErrorKind::Interrupted => {}
             Err(_) => {
                 // Neither EOF nor a bound: the transport failed and what was
                 // read is short by an unknown amount.
