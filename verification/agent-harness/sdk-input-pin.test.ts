@@ -11,7 +11,7 @@ test("local SDK is the reviewed current schemas-and-contracts composition", asyn
   const pin: { origin: string; files: Array<{ path: string; sha256: string }> } =
     await Bun.file(pinPath).json();
   expect(pin.origin).toBe("schemas-and-contracts/crates/sdk-rs");
-  expect(pin.files.length).toBe(113);
+  expect(pin.files.length).toBe(119);
   // The manifest pins the composed revision by git so Dependabot can resolve
   // it; the composition compiles this very sibling checkout in its place.
   const cargo = await Bun.file("Cargo.toml").text();
@@ -25,7 +25,7 @@ test("local SDK is the reviewed current schemas-and-contracts composition", asyn
       .trim(),
   );
   expect(await digest(pinPath)).toBe(
-    "0a5c5a90b879f31b572d91a94202336b960322ef84a26637a96584791def5033",
+    "e8e831a01a98d0218921faefaf6f8f365360cc82e0e3fd61e56a2a6b14de0b01",
   );
   for (const file of pin.files) {
     expect(file.path.startsWith("/") || file.path.split("/").includes("..")).toBe(false);
