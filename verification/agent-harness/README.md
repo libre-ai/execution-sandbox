@@ -13,7 +13,13 @@ and that capability lives in `src/host/` alone. Everything else is pure and host
   needed must be removable without the guard forcing dead weight to stay. Alternate dependency
   sections (`[dev-dependencies]`, `[build-dependencies]`, `[dependencies.*]`, target-scoped
   sections) are refused outright, including when hidden behind an unrecognized `[[…]]`
-  array-of-tables header.
+  array-of-tables header. Dependency names are read from the parsed manifest, so a quoted or
+  dotted key (`"reqwest" = "1"`, `reqwest.version = "1"`) names the same dependency as a bare
+  one; a manifest that does not parse fails the gate.
+- **Every spelling of a path is the same path.** Each literal ban is matched against the source
+  with `::` spacing removed and against every `use` tree flattened to one path per imported item:
+  `use std::{fs, io};`, `use std::{process::Command as C};` and `use std :: fs;` fail exactly like
+  `use std::fs;`. A `use` tree whose braces do not balance is refused, not skipped.
 - **Unsafe code is refused everywhere**, including under `src/host/`. The scan strips comments and
   attribute lines before testing for the `unsafe` keyword, so a trailing
   `// forbid(unsafe_code)` comment cannot buy a real `unsafe` block an exemption, and prose
@@ -30,6 +36,8 @@ and that capability lives in `src/host/` alone. Everything else is pure and host
   `OpenOptions` has crossed the runtime boundary the specification draws at `src/host/`.
 - **No runtime entry point.** `build.rs`, `src/main.rs` and `src/bin/` are all refused — this crate
   is a library, never a binary the harness's own boundary would then need to police.
+- **The gate reports its volume.** A pass prints the number of source files examined; zero files
+  is a failure, never a pass.
 
 Every future capability this crate opens edits `check-capabilities.ts` in the same pull request
 that adds the dependency or import the gate would otherwise reject — the allowlist and the runtime

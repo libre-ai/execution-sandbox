@@ -1,4 +1,7 @@
-import { describe, expect, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
   checkHarnessCapabilityBoundary,
   dependencyNames,
@@ -9,7 +12,9 @@ import {
 
 describe("WP-G3-H01 harness capability boundary", () => {
   test("confines the host capability to src/host and keeps the closed surfaces closed", async () => {
-    expect(await checkHarnessCapabilityBoundary()).toEqual([]);
+    const report = await checkHarnessCapabilityBoundary();
+    expect(report.failures).toEqual([]);
+    expect(report.sourceFiles).toBeGreaterThan(0);
   });
 
   test.each([
@@ -92,5 +97,138 @@ describe("WP-G3-H01 harness capability boundary", () => {
     "[target.'cfg(unix)'.dependencies]",
   ])("detects forbidden dependency section: %s", (manifest) => {
     expect(forbiddenDependencySections(manifest).length).toBeGreaterThan(0);
+  });
+});
+
+// Rust accepts the same path under several spellings; the boundary is on the
+// path, so every spelling of a host capability must fail like the plain one.
+describe("host capability spellings and gate volume", () => {
+  test.each([
+    ["grouped import", "use std::{fs, io};", "std::fs"],
+    ["nested grouped import", "use std::{io::{self, Read}, time::Duration};", "std::time"],
+    ["grouped and renamed import", "use std::{process::Command as C};", "std::process"],
+    ["spaced path", "use std :: fs;", "std::fs"],
+    ["spaced path in an expression", "let bytes = std :: fs\n    :: read(path);", "std::fs"],
+    [
+      "multi-line grouped import",
+      "pub use std::{\n    io,\n    thread, // worker\n};",
+      "std::thread",
+    ],
+  ])("%s is refused outside src/host: %s", (_label, source, capability) => {
+    expect(forbiddenOutsideHost("src/profile.rs", source)).toContain(
+      `host-capability-outside-host:src/profile.rs:${capability}`,
+    );
+  });
+
+  test.each([
+    "use std::{fs, io};",
+    "use std::{process::Command as C};",
+    "use std :: fs;",
+  ])("the same spelling stays allowed under src/host: %s", (source) => {
+    expect(forbiddenOutsideHost("src/host/process.rs", source)).toEqual([]);
+    expect(forbiddenEverywhere("src/host/process.rs", source)).toEqual([]);
+  });
+
+  test("imports that name no host capability stay allowed outside src/host", () => {
+    const source = "use std::path::{Path, PathBuf};\nuse serde_json::{Value, json};";
+    expect(forbiddenOutsideHost("src/profile.rs", source)).toEqual([]);
+    expect(forbiddenEverywhere("src/profile.rs", source)).toEqual([]);
+  });
+
+  test.each([
+    ["use tokio::{spawn, task};", "tokio::"],
+    ["use std::{self as platform};", "std-alias"],
+    ["use std::{fs, io;", "use-tree-unparseable"],
+  ])("closed everywhere under a grouped spelling: %s", (source, label) => {
+    expect(forbiddenEverywhere("src/host/process.rs", source)).toContain(
+      `capability-forbidden:src/host/process.rs:${label}`,
+    );
+  });
+
+  test.each([
+    '"reqwest" = "1"',
+    "'reqwest' = \"1\"",
+    '"reqwest".version = "1"',
+    'Reqwest = "1"',
+  ])("a dependency key is read whatever its quoting: %s", (line) => {
+    const manifest = ["[dependencies]", 'serde = "=1.0.228"', line].join("\n");
+    expect(dependencyNames(manifest)).toEqual(["serde", line.replace(/^["']?(\w+).*$/u, "$1")]);
+  });
+
+  describe("on a fixture crate", () => {
+    let root: string;
+    const gate = join(import.meta.dir, "check-capabilities.ts");
+    // The child inherits nothing: an ambient variable must not decide the verdict.
+    const runGate = () =>
+      Bun.spawnSync([process.execPath, gate], {
+        cwd: root,
+        env: {},
+        stdout: "pipe",
+        stderr: "pipe",
+      });
+
+    beforeEach(async () => {
+      root = await mkdtemp(join(tmpdir(), "harness-capabilities-"));
+      await Bun.write(join(root, "Cargo.toml"), '[dependencies]\nserde = "1"\n');
+      await Bun.write(join(root, "src/lib.rs"), "mod host;\n");
+      await Bun.write(join(root, "src/host/mod.rs"), "use std::{fs, process::Command};\n");
+    });
+    afterEach(async () => {
+      await rm(root, { recursive: true, force: true });
+    });
+
+    test("a conforming crate passes and reports the files it examined", async () => {
+      expect(await checkHarnessCapabilityBoundary(root)).toEqual({ failures: [], sourceFiles: 2 });
+      const run = runGate();
+      expect(run.stderr.toString()).toBe("");
+      expect(run.exitCode).toBe(0);
+      expect(run.stdout.toString()).toContain("2 source file(s) examined");
+    });
+
+    test("a grouped host import in a pure module fails the whole gate", async () => {
+      await Bun.write(join(root, "src/profile.rs"), "use std::{fs, io};\n");
+      expect((await checkHarnessCapabilityBoundary(root)).failures).toEqual([
+        "host-capability-outside-host:src/profile.rs:std::fs",
+      ]);
+      expect(runGate().exitCode).toBe(1);
+    });
+
+    test("a quoted dependency key outside the allowlist fails the whole gate", async () => {
+      await Bun.write(join(root, "Cargo.toml"), '[dependencies]\n"reqwest" = "1"\n');
+      expect((await checkHarnessCapabilityBoundary(root)).failures).toEqual([
+        "dependency-not-allowed:reqwest",
+      ]);
+    });
+
+    test.each([
+      "src/bin/tool.rs",
+      "src/bin/.keep",
+      "src/main.rs",
+      "build.rs",
+    ])("a runtime entry is refused: %s", async (entry) => {
+      await Bun.write(join(root, entry), "\n");
+      const expected = entry.startsWith("src/bin/") ? "src/bin" : entry;
+      expect((await checkHarnessCapabilityBoundary(root)).failures).toContain(
+        `runtime-entry-forbidden:${expected}`,
+      );
+    });
+
+    test("zero source files is a failure, never a pass", async () => {
+      await rm(join(root, "src"), { recursive: true });
+      expect(await checkHarnessCapabilityBoundary(root)).toEqual({
+        failures: ["runtime-source-missing"],
+        sourceFiles: 0,
+      });
+      const run = runGate();
+      expect(run.exitCode).toBe(1);
+      expect(run.stderr.toString()).toContain("runtime-source-missing");
+      expect(run.stdout.toString()).toBe("");
+    });
+
+    test("an unreadable manifest is a failure", async () => {
+      await rm(join(root, "Cargo.toml"));
+      await expect(checkHarnessCapabilityBoundary(root)).rejects.toThrow();
+      expect(runGate().exitCode).not.toBe(0);
+    });
   });
 });
