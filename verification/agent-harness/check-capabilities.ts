@@ -355,8 +355,11 @@ const isTable = (value: unknown): value is TomlTable =>
 
 // The single place the manifest is parsed. A manifest that does not parse
 // throws, and the gate fails: nothing can be said about its dependencies.
+// The line break is appended because the pinned Bun (1.4.0-canary.1) refuses
+// a table header that ends the file without one ("Expected line break but
+// found end of file"), which is valid TOML and which Bun 1.4.4 accepts.
 function parseManifest(manifest: string): TomlTable {
-  return Bun.TOML.parse(manifest) as TomlTable;
+  return Bun.TOML.parse(`${manifest}\n`) as TomlTable;
 }
 
 // Every table whose key ends in `dependencies`, at any depth, other than the
