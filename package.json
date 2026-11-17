@@ -24,7 +24,7 @@
     "check:toolchain": "bun run check:bun && bun node_modules/@libre-ai/governance/tools/quality/check-toolchain.ts",
     "check:secret-scan": "bun run check:bun:runtime && bun node_modules/@libre-ai/governance/tools/quality/check-secret-scan.ts",
     "check:personal-data": "bun run check:bun:runtime && bun node_modules/@libre-ai/governance/tools/quality/check-personal-data-boundary.ts",
-    "check:capabilities": "bun run check:bun:runtime && bun test verification/agent-harness/capability-boundary.test.ts",
+    "check:capabilities": "bun run check:bun:runtime && bun test verification/agent-harness/capability-boundary.test.ts && bun verification/agent-harness/check-capabilities.ts",
     "check:specifications": "bun run check:bun:runtime && bun node_modules/@libre-ai/governance/tools/quality/check-specification-lock.ts --apps harness",
     "lint": "bun run check:bun:runtime && biome ci .",
     "typecheck": "bun run check:bun:runtime && tsc --noEmit -p tsconfig.json",
