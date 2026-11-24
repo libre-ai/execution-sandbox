@@ -84,6 +84,36 @@ fn a_write_to_a_denied_path_produces_its_code_never_a_warning() {
     assert_eq!(refusal.code(), "harness.denied_path_touched");
 }
 
+/// On a real workspace: a file exists and sits inside the root, and is still
+/// not readable unless the profile lists it.
+#[test]
+fn a_read_is_held_to_the_read_only_and_writable_sets_on_a_real_workspace() {
+    let fixture = Fixture::new("read");
+    fs::create_dir_all(fixture.workspace.join("in")).expect("the input directory must build");
+    fs::write(fixture.workspace.join("in/data.txt"), b"input").expect("the input must build");
+    fs::write(fixture.workspace.join("scratch.txt"), b"unlisted").expect("the file must build");
+    let observer =
+        WorkspaceObserver::new(&fixture.workspace).expect("the workspace root must canonicalize");
+
+    let canonical = observer
+        .judge(
+            &fixture.workspace.join("in/data.txt"),
+            PathAccessKind::Read,
+            &profile(),
+        )
+        .expect("a read inside the read-only set passes");
+    assert!(canonical.ends_with("in/data.txt"));
+
+    let refusal = observer
+        .judge(
+            &fixture.workspace.join("scratch.txt"),
+            PathAccessKind::Read,
+            &profile(),
+        )
+        .expect_err("an existing file the profile lists nowhere is not readable");
+    assert_eq!(refusal.code(), "harness.denied_path_touched");
+}
+
 #[test]
 fn a_legitimate_write_target_resolves_to_its_canonical_path() {
     let fixture = Fixture::new("write");

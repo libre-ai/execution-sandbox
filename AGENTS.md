@@ -34,4 +34,5 @@ run `bun run check`. Never hide a red test.
 ## Easy-to-break invariants
 
 - A profile cannot relax a control: every process boolean is `const: true` and the engine either applies it or refuses the run (`src/confinement.rs:4-8`).
-- `readOnly` is parsed and never enforced: a read passes once inside the workspace and outside `denied` (`src/profile.rs:118`, `src/fs_policy.rs:155-156`).
+- `readOnly` is enforced by the path policy: a read passes only under `readOnly` or `writable`, `denied` wins over both, and `readOnly` never grants a write or a path outside the workspace (`evaluate_path_access` in `src/fs_policy.rs`). An unlisted read is refused with `harness.denied_path_touched`; the refusal matrix stays closed.
+- That policy binds only the accesses the harness arbitrates (`WorkspaceObserver::judge`). The worker's own system calls are not intercepted: the workspace is a starting directory, not a boundary (`src/host/run.rs`, `run_confined_attested`).

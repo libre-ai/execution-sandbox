@@ -24,6 +24,13 @@ The harness is the boundary a worker cannot talk its way out of. It takes a requ
 
 2. **Apply filesystem confinement.** The workspace root is canonicalized, symlinks resolved under the declared policy, and the read-only, writable and denied sets applied. A path escaping the workspace root after canonicalization is refused before any process starts.
 
+   The three sets decide in this order, and they only restrict — no entry makes a path outside the workspace reachable:
+   - a path in `denied` is refused for every access, even when `readOnly` or `writable` also lists it;
+   - a read is admitted only under `readOnly` or `writable`; inside the workspace is not enough;
+   - a write is admitted only under `writable`; listing a path in `readOnly` never makes it writable.
+
+   **Limit.** These rules bind the accesses the harness arbitrates: those submitted to the path policy (`WorkspaceObserver::judge`, `evaluate_path_access`). The worker's own system calls are not intercepted — the workspace is its starting directory, not a boundary — so `readOnly` does not stop a confined process from opening a file by itself, and filesystem confinement is not among the attested effective controls.
+
 3. **Run confined.** The worker process is spawned inside the applied controls. Output is bounded per tool and in total; exceeding a bound truncates and refuses rather than buffering without limit. Transport EOF ends execution immediately: the harness signals cleanup before reaping the leader, preserving the process-group identity until the signal is sent. There is no shutdown grace period. A program that closes its transport during otherwise normal cleanup can therefore be interrupted; complete output and a valid run token do not establish native success. A nonzero or signalled native exit cannot produce an attestation and is reported as `RunError::WorkerFault` when the output and binding checks pass. Callers must not assume an ordinary program such as `cat` always completes successfully under this lifecycle policy.
 
 4. **Scan outputs fail-closed.** Outputs are scanned before leaving the boundary. A scan that cannot complete refuses the result — an unscanned output is treated as a failed one, never as a clean one.
@@ -60,7 +67,7 @@ Requested and effective controls are distinct fields throughout. Collapsing them
 - `harness.path_escapes_workspace` — a path leaves the workspace root after canonicalization.
 - `harness.symlink_policy_violation` — a symlink resolves outside the policy's allowance.
 - `harness.write_outside_writable_set` — a write targets a path not in the writable set.
-- `harness.denied_path_touched` — a path in the denied set was accessed.
+- `harness.denied_path_touched` — a path in the denied set was accessed, or a read targeted a path in neither the read-only nor the writable set.
 - `harness.output_limit_exceeded` — per-tool or total output bytes exceeded.
 - `harness.output_scan_incomplete` — the fail-closed output scan could not complete.
 - `harness.capability_not_enabled` — the profile requests a capability closed at this stage.

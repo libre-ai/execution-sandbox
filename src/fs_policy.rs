@@ -3,7 +3,8 @@ use crate::refusal::HarnessRefusal;
 use std::path::{Path, PathBuf};
 
 /// How a path is about to be touched. Writes are held to the writable set;
-/// reads are held to the workspace and the denied set.
+/// reads are held to the read-only and writable sets. The denied set blocks
+/// both.
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PathAccessKind {
     Read,
@@ -133,8 +134,14 @@ fn any_matches(patterns: &[String], relative: &str) -> bool {
 }
 
 /// Journey 2 of the specification, decided on canonical facts: escape before
-/// policy, denial before write rights, and a symlink that leaves the
-/// workspace is named as the symlink policy it violated.
+/// policy, denial before read and write rights, and a symlink that leaves
+/// the workspace is named as the symlink policy it violated.
+///
+/// The sets only restrict. A read is admitted under `readOnly` or `writable`
+/// and nowhere else; a write is admitted under `writable` only, so listing a
+/// path in `readOnly` never makes it writable. A read under neither set is
+/// refused with the denied-path code: the refusal matrix is closed, and a
+/// path the profile does not list is denied by default.
 pub fn evaluate_path_access(
     workspace_root: &Path,
     access: &PathAccess,
@@ -153,7 +160,15 @@ pub fn evaluate_path_access(
     }
 
     match access.kind {
-        PathAccessKind::Read => Ok(()),
+        PathAccessKind::Read => {
+            if any_matches(profile.read_only_paths(), &relative)
+                || any_matches(profile.writable_paths(), &relative)
+            {
+                Ok(())
+            } else {
+                Err(HarnessRefusal::DeniedPathTouched)
+            }
+        }
         PathAccessKind::Write => {
             if any_matches(profile.writable_paths(), &relative) {
                 Ok(())

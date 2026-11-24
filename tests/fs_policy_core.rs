@@ -36,27 +36,110 @@ fn via_symlink(path: &str, kind: PathAccessKind) -> PathAccess {
     PathAccess::new(Path::new(path), true, kind)
 }
 
+/// The canonical profile with its read-only set replaced.
+fn profile_with_read_only(pattern: &str) -> libre_ai_harness::HarnessProfile {
+    let mut document: Value =
+        serde_json::from_str(CANONICAL_PROFILE).expect("the canonical profile fixture must parse");
+    document["filesystem"]["readOnly"] = serde_json::json!([pattern]);
+    let digest = libre_ai_harness::profile_digest(&document).expect("the mutation must digest");
+    document["profileDigest"] = Value::String(digest);
+    let registry = ContractRegistry::embedded().expect("embedded contracts must compile");
+    parse_profile(&registry, &document).expect("the mutated profile must parse")
+}
+
 #[test]
-fn writes_inside_the_writable_set_and_reads_inside_the_workspace_pass() {
-    let profile = profile();
+fn a_write_inside_the_writable_set_passes() {
     evaluate_path_access(
         Path::new(ROOT),
         &access("/ws/out/result.txt", PathAccessKind::Write),
-        &profile,
+        &profile(),
     )
     .expect("a write inside the writable set passes");
+}
+
+#[test]
+fn a_read_inside_the_read_only_set_passes() {
     evaluate_path_access(
         Path::new(ROOT),
         &access("/ws/in/data.txt", PathAccessKind::Read),
-        &profile,
+        &profile(),
     )
     .expect("a read of the read-only set passes");
+}
+
+#[test]
+fn a_read_inside_the_writable_set_passes() {
+    evaluate_path_access(
+        Path::new(ROOT),
+        &access("/ws/out/result.txt", PathAccessKind::Read),
+        &profile(),
+    )
+    .expect("what the worker may write, it may read back");
+}
+
+/// `readOnly` is enforced: inside the workspace is not enough. The matrix is
+/// closed, so the refusal carries the denied-path code, and a refusal never
+/// carries the path it judged.
+#[test]
+fn a_read_inside_the_workspace_outside_both_sets_is_refused() {
+    let refusal = evaluate_path_access(
+        Path::new(ROOT),
+        &access("/ws/scratch.txt", PathAccessKind::Read),
+        &profile(),
+    )
+    .expect_err("a path the profile lists nowhere is not readable");
+    assert_eq!(refusal.code(), "harness.denied_path_touched");
+    assert!(
+        !format!("{refusal:?} {}", refusal.code()).contains("scratch"),
+        "a refusal names the invariant, never the requested path"
+    );
+}
+
+/// The read-only set here covers the whole workspace, so only the denied set
+/// stands between the worker and `.env`.
+#[test]
+fn the_denied_set_wins_over_the_read_only_set() {
+    let profile = profile_with_read_only("**");
     evaluate_path_access(
         Path::new(ROOT),
         &access("/ws/scratch.txt", PathAccessKind::Read),
         &profile,
     )
-    .expect("a read inside the workspace outside every set still passes");
+    .expect("the widened read-only set admits an ordinary path");
+    for subject in ["/ws/.env", "/ws/vendor/.git/config"] {
+        let refusal = evaluate_path_access(
+            Path::new(ROOT),
+            &access(subject, PathAccessKind::Read),
+            &profile,
+        )
+        .expect_err("a denied path stays denied under the read-only set");
+        assert_eq!(refusal.code(), "harness.denied_path_touched");
+    }
+}
+
+/// Listing a path as read-only restricts; it never grants a write.
+#[test]
+fn a_write_inside_the_read_only_set_is_refused() {
+    let refusal = evaluate_path_access(
+        Path::new(ROOT),
+        &access("/ws/scratch.txt", PathAccessKind::Write),
+        &profile_with_read_only("**"),
+    )
+    .expect_err("the read-only set is not writable");
+    assert_eq!(refusal.code(), "harness.write_outside_writable_set");
+}
+
+/// A profile restricts and never grants: no read-only pattern reaches a path
+/// outside the workspace.
+#[test]
+fn the_read_only_set_grants_nothing_outside_the_workspace() {
+    let refusal = evaluate_path_access(
+        Path::new(ROOT),
+        &access("/etc/passwd", PathAccessKind::Read),
+        &profile_with_read_only("**"),
+    )
+    .expect_err("the widest read-only set stops at the workspace root");
+    assert_eq!(refusal.code(), "harness.path_escapes_workspace");
 }
 
 #[test]
