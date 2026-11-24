@@ -19,8 +19,22 @@
 [graph]
 all-features = true
 
+# waiver-review-anchor: 2026-11-24
 [advisories]
 yanked = "deny"
+# Stated, not inherited: cargo-deny 0.22.0 narrowed its default scope for
+# unmaintained-crate advisories from `all` to `workspace` (direct dependencies
+# of workspace crates only). `all` is what 0.19.5, the version this file was
+# written for, applied when the key was absent; writing it keeps unmaintained
+# advisories reported on the whole graph whichever version reads this file.
+# It covers `unmaintained` only: `unsound` is not written here and stays at
+# its default, `workspace` under both versions.
+unmaintained = "all"
+# Dated waiver, owner decision of 2026-11-24, under the policy
+# docs/security/ADVISORY-WAIVER-POLICY.md of libre-ai/project-governance.
+ignore = [
+  { id = "RUSTSEC-2026-0543", reason = "chrono is flagged unmaintained with no patched version (patched = []); the repository reaches it only through libre-ai-contract-types, taken from a git revision of libre-ai/schemas-and-contracts; expires=2027-02-24; ref=https://rustsec.org/advisories/RUSTSEC-2026-0543" },
+]
 
 [licenses]
 confidence-threshold = 0.9
