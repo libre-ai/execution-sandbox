@@ -51,6 +51,26 @@ fn rejects_a_schema_violation_without_reflecting_the_value() {
 }
 
 #[test]
+fn rejects_an_unknown_root_key_without_reflecting_it() {
+    let mut document = canonical_profile();
+    document["unknown-root-key"] = Value::String("extra-value".to_owned());
+    let refusal =
+        parse_profile(&registry(), &document).expect_err("an unknown root key is refused");
+    assert_eq!(refusal.code(), "harness.profile_unresolved");
+    assert!(!format!("{refusal:?}").contains("unknown-root-key"));
+}
+
+#[test]
+fn rejects_an_unknown_filesystem_key_without_reflecting_it() {
+    let mut document = canonical_profile();
+    document["filesystem"]["unknown-fs-key"] = Value::String("extra-value".to_owned());
+    let refusal =
+        parse_profile(&registry(), &document).expect_err("an unknown filesystem key is refused");
+    assert_eq!(refusal.code(), "harness.profile_unresolved");
+    assert!(!format!("{refusal:?}").contains("unknown-fs-key"));
+}
+
+#[test]
 fn rejects_an_embedded_digest_that_does_not_match_the_content() {
     let mut document = canonical_profile();
     document["profileDigest"] = Value::String("d".repeat(64));

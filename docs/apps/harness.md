@@ -71,7 +71,7 @@ Requested and effective controls are distinct fields throughout. Collapsing them
 
 The harness owns no product data. It persists exactly three things, all under the shared tenant barrier: profiles (immutable, content-addressed by digest), attestations (append-only, signed, never edited), and refusal records (code, profile digest, run reference — never the offending content).
 
-Worker output is not stored. Only its digest, its byte count and its truncation flag survive the boundary. Operational logs follow `harness-profile.v1`: private by default, closed categories and counters, content fields disabled unless the profile enables them, external telemetry off, bounded retention, coarse timestamps.
+Worker output is not stored. Only its digest, its byte count and its truncation flag survive the boundary. Operational logs follow `harness-profile.v2`: private by default, closed categories and counters, content fields disabled unless the profile enables them, external telemetry off, bounded retention, coarse timestamps.
 
 ## Authentication and authorization
 
@@ -97,7 +97,7 @@ Degraded modes fail closed without exception. A control that cannot be applied r
 
 ## Contracts
 
-- `contracts/schemas/harness-profile.v1.schema.json`
+- `contracts/schemas/harness-profile.v2.schema.json`
 - `contracts/schemas/harness-attestation.v1.schema.json`
 - `contracts/schemas/execution-plan-body.v1.schema.json`
 - `contracts/authz/authority-v1.datalog`
